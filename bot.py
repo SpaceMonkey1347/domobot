@@ -27,13 +27,7 @@ bot = commands.Bot(
         help_command=help_command
         )
 
-
-try:
-    handler = logging.FileHandler(filename='logs/discord.log', encoding='utf-8', mode='w+')
-except FileExistsError:
-    open('logs/discord.log', mode='x')
-    handler = logging.FileHandler(filename='logs/discord.log', encoding='utf-8', mode='w+')
-
+handler = logging.FileHandler(filename='logs/discord.log', encoding='utf-8', mode='w+')
 message_logger = logging.FileHandler(filename='logs/mess.log', encoding='utf-8', mode='w+')
 logging.basicConfig(filename='logs/mess.log', encoding='utf-8', level=logging.DEBUG)
 
