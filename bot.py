@@ -307,8 +307,6 @@ async def monty(ctx, *args):
         """,
         )
 async def roll(ctx, *args):
-    print("\nTEST\n")
-
     grand_total_mods = []
     grand_total = 0
     roll_totals = []
@@ -350,10 +348,10 @@ async def roll(ctx, *args):
                 grand_total_mods.append(int(mod))
                 grand_total += int(mod)
 
-            print("TOTAL", arg)
-            print("totals", modifiers)
-            print("grand total", grand_total)
-            print('')
+            # print("TOTAL", arg)
+            # print("totals", modifiers)
+            # print("grand total", grand_total)
+            # print('')
 
         if roll_ptn.search(arg):
             # defaults
@@ -449,11 +447,6 @@ async def nykro_encipher(ctx):
 async def nykro_decipher(ctx):
     content = await cipher(ctx)
     await ctx.send(nykro_cipher(content, False))
-
-
-@bot.command()
-async def nword(ctx):
-    pass
 
 
 @bot.command()
