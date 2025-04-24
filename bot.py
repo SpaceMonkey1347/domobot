@@ -31,7 +31,7 @@ bot = commands.Bot(
 try:
     handler = logging.FileHandler(filename='logs/discord.log', encoding='utf-8', mode='w+')
 except FileExistsError:
-    open('logs/discord.log', mode='w')
+    open('logs/discord.log', mode='x')
     handler = logging.FileHandler(filename='logs/discord.log', encoding='utf-8', mode='w+')
 
 message_logger = logging.FileHandler(filename='logs/mess.log', encoding='utf-8', mode='w+')
