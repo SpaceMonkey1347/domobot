@@ -16,6 +16,10 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 assert isinstance(TOKEN, str)
 
+
+user_input = input("Type something!")
+print(user_input)
+
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 help_command = commands.DefaultHelpCommand(show_parameter_descriptions=False)
