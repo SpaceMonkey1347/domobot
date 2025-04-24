@@ -401,14 +401,14 @@ async def roll(ctx, *args):
             embed.add_field(name=arg, value=(f'{modifier} + {roll_values}\n'
                                              f'={roll_total}'))
 
-            print("ROLL", arg)
-            print('modifier', modifier)
-            print('count', count)
-            print('sides', sides)
-            print('roll values', roll_values)
-            print('roll total', roll_total)
-            print('grand total', grand_total)
-            print('')
+            # print("ROLL", arg)
+            # print('modifier', modifier)
+            # print('count', count)
+            # print('sides', sides)
+            # print('roll values', roll_values)
+            # print('roll total', roll_total)
+            # print('grand total', grand_total)
+            # print('')
 
     embed.add_field(name='Grand Total', value=f'{grand_total}', inline=False)
     await ctx.send(embed=embed)
