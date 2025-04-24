@@ -3,11 +3,14 @@ import random
 from dotenv import load_dotenv
 import re
 
+import logging
+
 import discord
 from discord.ext import commands
 
 import messages as mes
 from finance import lookup, usd
+from cipher import nykro_cipher
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -24,6 +27,10 @@ bot = commands.Bot(
         help_command=help_command
         )
 
+
+handler = logging.FileHandler(filename='logs/discord.log', encoding='utf-8', mode='w+')
+message_logger = logging.FileHandler(filename='logs/mess.log', encoding='utf-8', mode='w+')
+logging.basicConfig(filename='logs/mess.log', encoding='utf-8', level=logging.DEBUG)
 
 # BOT EVENTS
 
@@ -46,6 +53,7 @@ async def on_message(message):
     if message.author == client.user:
         return
     await bot.process_commands(message)
+    logging.info(message)
 
 
 # BOT COMMANDS
@@ -250,53 +258,53 @@ async def monty(ctx, *args):
 
 @bot.command(
         brief='Roll dice in D&D format (ex: 3d6+10)',
-        description=(
-            f'Usage: `{prefix}role [#d#[+m]]... [flag]...`\n'
-            'Default value: 1d20+0\n'
-            '\n'
-            'Roll # of dice with # of sides with optional [m] modifier\n'
-            '# of dice can be negative (subtracting roll from modifier[s])\n'
-            'Each roll (seperated by <Space>) is a calculated seperatly\n'
-            'Dice can have any number of sides and be in any quantity\n'
-            'Modifiers are numbers not next to a \'d\'\n'
-            'Modifiers not in roll arguments are added to sum total\n'
-            'Rolls can have only one roll but any number of modifiers\n'
-            'If number of dice is ommited, defaults to 1\n'
-            'If number of sides is ommited, defaults to 20\n'
-            '\n'
-            'Flags: all flags can be added in any order\n'
-            '\n'
-            'Modifier Flags: you can use first 3 letter as a shorthand\n'
-            '`[adv]antage`: roll with advantage\n'
-            '`[dis]advantage`: roll with disadvantage\n'
-            '`[emp]thasis`: roll with empthasis (take least average roll)\n'
-            '\n'
-            'Sum Flags: rules for how outputs are added together\n'
-            '`sum-all`: sum total and indivisual rolls (default)\n'
-            '`sum-total`: sum total of all rolls\n'
-            '`sum-rolls`: sum indivisual rolls\n'
-            '`sum-[pre]vious`: sum total with previous roll in channel\n'
-            '`sum-none`: do not sum\n'
-            '\n'
-            'Scoped Flags: only one can be used per command\n'
-            '`global`: apply flags for everyone in server (access: Mod)\n'
-            '`party`: apply flags for everyone in party (access: DM)\n'
-            '`@user`: apply flags for mentioned user (access: DM/Mod)\n:'
-            '\n'
-            'Meta Flags: flags on how to process flags'
-            '`once-flags`: do flags for next roll only\n'
-            '`keep-flags`: toggle flags or apply following flags\n'
-            '`reset-flags`: resets personal (default) or scoped flags\n'
-            '\n'
-            'Examples:\n'
-            f'`{prefix}roll 2d6`\n'
-            f'`{prefix}roll 6d`\n'
-            f'`{prefix}roll d100+10`\n'
-            f'`{prefix}roll sum-alike 15+2d2 3d2 4d6`\n'
-            f'`{prefix}roll sum-rolls 5d8-10 d20 -4d`\n'
-            f'`{prefix}roll adv 2d8+10`\n'
-            f'`{prefix}roll once-flags sum-rolls advantage @example`'
-            ),
+        description=f"""
+        Usage: `{prefix}role [#d#[+m]]... [flag]...`
+        Default value: 1d20+0
+
+        Roll # of dice with # of sides with optional [m] modifier
+        # of dice can be negative (subtracting roll from modifier[s])
+        Each roll (seperated by <Space>) is a calculated seperatly
+        Dice can have any number of sides and be in any quantity
+        Modifiers are numbers not next to a 'd'
+        Modifiers not in roll arguments are added to sum total
+        Rolls can have only one roll but any number of modifiers
+        If number of dice is ommited, defaults to 1
+        If number of sides is ommited, defaults to 20
+
+        Flags: all flags can be added in any order
+
+        Modifier Flags: you can use first 3 letter as a shorthand
+        `[adv]antage`: roll with advantage
+        `[dis]advantage`: roll with disadvantage
+        `[emp]thasis`: roll with empthasis (take least average roll)
+
+        Sum Flags: rules for how outputs are added together
+        `sum-all`: sum total and indivisual rolls (default)
+        `sum-total`: sum total of all rolls
+        `sum-rolls`: sum indivisual rolls
+        `sum-[pre]vious`: sum total with previous roll in channel
+        `sum-none`: do not sum
+
+        Scoped Flags: only one can be used per command
+        `global`: apply flags for everyone in server (access: Mod)
+        `party`: apply flags for everyone in party (access: DM)
+        `@user`: apply flags for mentioned user (access: DM/Mod)
+
+        Meta Flags: flags on how to process flags'
+        `once-flags`: do flags for next roll only
+        `keep-flags`: toggle flags or apply following flags
+        `reset-flags`: resets personal (default) or scoped flags
+
+        Examples:
+        `{prefix}roll 2d6
+        `{prefix}roll 6d`
+        `{prefix}roll d100+10`
+        `{prefix}roll sum-alike 15+2d2 3d2 4d6`
+        `{prefix}roll sum-rolls 5d8-10 d20 -4d`
+        `{prefix}roll adv 2d8+10`
+        `{prefix}roll once-flags sum-rolls advantage @example`
+        """,
         )
 async def roll(ctx, *args):
     print("\nTEST\n")
@@ -406,6 +414,53 @@ async def roll(ctx, *args):
     await ctx.send(embed=embed)
 
 
+async def cipher(ctx):
+    content = ctx.message.content
+    reference = ctx.message.reference
+    if reference:
+        message = await ctx.channel.fetch_message(ctx.message.reference.message_id)
+        content = message.content
+    content = content.replace(f"{bot.command_prefix}nykro_encipher ", "", 1)
+    content = content.replace(f"{bot.command_prefix}nykro_decipher ", "", 1)
+    return content
+
+
+@bot.command(
+        brief="Encipher your message using nykrocipher",
+        description=f"""
+        Encipher your message using nykrocipher.
+        Usage: `{bot.command_prefix}nykro_encipher message`
+        or reply to any message with `{bot.command_prefix}nykro_encipher`
+        """,)
+async def nykro_encipher(ctx):
+    content = await cipher(ctx)
+    await ctx.send(nykro_cipher(content, True))
+
+
+
+@bot.command(
+        brief="Decipher a Nykrociphered message",
+        description=f"""
+        Decipher a Nykrociphered message.
+        Usage: `{bot.command_prefix}nykro_decipher message`
+        or reply to any message with `{bot.command_prefix}nykro_decipher`
+        """
+        )
+async def nykro_decipher(ctx):
+    content = await cipher(ctx)
+    await ctx.send(nykro_cipher(content, False))
+
+
+@bot.command()
+async def nword(ctx):
+    pass
+
+
+@bot.command()
+async def top(ctx):
+    pass
+
+
 # @bot.command(
 #         brief='',
 #         description='',
@@ -423,4 +478,4 @@ async def roll(ctx, *args):
 #     ...
 
 
-bot.run(TOKEN)
+bot.run(TOKEN, log_handler=handler)
