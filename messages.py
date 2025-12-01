@@ -47,6 +47,7 @@ def welcome(mention):
             f'Hey {mention}, did you bring the toe dip?',
             f'Here\'s {mention}!',
             f'Hello there {mention}',
+            f'Welcome to the cream kingdom, bitch! Open up!',
             (
                 f'Good morning {mention}, and in case I don\'t see ya,'
                 ' good afternoon, good evening, and good night!'
