@@ -27,9 +27,19 @@ bot = commands.Bot(
         help_command=help_command
         )
 
-handler = logging.FileHandler(filename='logs/discord.log', encoding='utf-8', mode='w+')
-message_logger = logging.FileHandler(filename='logs/mess.log', encoding='utf-8', mode='w+')
-logging.basicConfig(filename='logs/mess.log', encoding='utf-8', level=logging.DEBUG)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+discord_log_file = os.path.join(BASE_DIR, "logs", "discord.log")
+message_log_file = os.path.join(BASE_DIR, "logs", "mess.log")
+
+os.makedirs(os.path.dirname(discord_log_file), exist_ok=True)
+os.makedirs(os.path.dirname(message_log_file), exist_ok=True)
+
+
+
+handler = logging.FileHandler(filename=discord_log_file, encoding='utf-8', mode='w+')
+message_logger = logging.FileHandler(filename=message_log_file, encoding='utf-8', mode='w+')
+logging.basicConfig(filename=message_log_file, encoding='utf-8', level=logging.DEBUG)
 
 # BOT EVENTS
 
